@@ -1,0 +1,40 @@
+{
+  "source": "baidu-satellite-tiles",
+  "tile_url_template": "https://maponline{s}.bdimg.com/starpic/?qt=satepc&u=x={x};y={y};z={z};v=009;type=sate&fm=46",
+  "zoom": 16,
+  "bbox_wgs84": {
+    "west": 113.14249999999998,
+    "east": 113.54750000000001,
+    "south": 22.8675,
+    "north": 23.122499999999995
+  },
+  "mercator": {
+    "west": 12596288.821568927,
+    "south": 2616369.4369567307,
+    "east": 12641346.352147402,
+    "north": 2647291.6040254547
+  },
+  "tile_range": {
+    "x0": 12301,
+    "x1": 12345,
+    "y0": 2555,
+    "y1": 2585
+  },
+  "pixel_size": {
+    "width": 8192,
+    "height": 5643
+  },
+  "note": "底图已按倍数扩展；核心 320x200 区域坐标不变。",
+  "core_bbox_wgs84": {
+    "west": 113.21,
+    "south": 22.91,
+    "east": 113.48,
+    "north": 23.08
+  },
+  "resized_to_max_width": 8192,
+  "map_units": {
+    "width": 480,
+    "height": 300
+  },
+  "expand_factor": 1.5
+}
