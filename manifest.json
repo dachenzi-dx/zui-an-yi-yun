@@ -1,0 +1,23 @@
+{
+  "name": "罪案疑云 · 单人侦破模式",
+  "short_name": "罪案疑云",
+  "description": "单人侦破模式 - 基于洛杉矶地图的推理游戏",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#02060d",
+  "theme_color": "#38e8ff",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "data/images/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "lang": "zh-CN",
+  "dir": "ltr",
+  "scope": "/",
+  "prefer_related_applications": false
+}

@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>罪案疑云 · 单人侦破模式</title>
+  <link rel="icon" type="image/png" href="/data/images/icon.png" />
+  <link rel="apple-touch-icon" href="/data/images/icon.png" />
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#38e8ff" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="罪案疑云" />
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#38e8ff" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="罪案疑云" />
+  <link rel="stylesheet" href="/css/styles.css?v=20260723-satellite" />
+</head>
+<body>
+  <div class="app">
+    <header class="top-bar">
+      <div class="brand">
+        <span class="brand-icon">🔍</span>
+        <h1>罪案疑云 · 侦破模式</h1>
+      </div>
+      <div class="top-actions">
+        <div class="stress-meter" id="stress-meter" title="压力（满 3 点则天数 -1）" aria-label="压力">
+          <span class="stress-bolt" data-i="0">⚡</span>
+          <span class="stress-bolt" data-i="1">⚡</span>
+          <span class="stress-bolt" data-i="2">⚡</span>
+        </div>
+        <button type="button" id="btn-history" class="btn btn-ghost">📋 历史存档</button>
+        <button type="button" id="btn-start" class="btn btn-primary">▶ 游戏开始</button>
+        <button type="button" id="btn-end" class="btn btn-danger hidden">⏹ 结束游戏</button>
+      </div>
+    </header>
+
+    <div class="main-layout">
+      <aside class="sidebar">
+        <section class="panel status-panel">
+          <h2>游戏状态</h2>
+          <div class="status-grid">
+            <div class="status-item">
+              <span class="label">当前天数</span>
+              <span class="value" id="stat-day">—</span>
+            </div>
+            <div class="status-item">
+              <span class="label">行动点</span>
+              <span class="value" id="stat-ap">—</span>
+            </div>
+            <div class="status-item full">
+              <span class="label">所在位置</span>
+              <span class="value" id="stat-location">—</span>
+            </div>
+          </div>
+          <div class="ap-dots" id="ap-dots"></div>
+        </section>
+
+        <section class="panel action-panel">
+          <h2>行动</h2>
+          <p class="hint">以下操作各消耗 1 行动点</p>
+          <button type="button" id="btn-interrogate" class="btn btn-action" disabled>🗣 盘问</button>
+          <button type="button" id="btn-search-sidebar" class="btn btn-action" disabled>🔎 搜身</button>
+          <p class="hint hint-secondary">以下不消耗行动点</p>
+          <button type="button" id="btn-add-suspect-ingame" class="btn btn-manage" disabled>👤 登记嫌疑人</button>
+          <button type="button" id="btn-add-location-note" class="btn btn-manage" disabled>📍 地点备注</button>
+          <button type="button" id="btn-undo" class="btn btn-manage" disabled>↩ 撤回行动</button>
+          <button type="button" id="btn-add-stress" class="btn btn-manage" disabled>⚡ 补充压力</button>
+          <button type="button" id="btn-modify-chips" class="btn btn-manage" disabled>🎫 修改筹码</button>
+        </section>
+
+        <section class="panel log-panel">
+          <h2>行动记录</h2>
+          <div class="log-list" id="action-log">
+            <p class="empty-hint">开始游戏后显示行动记录</p>
+          </div>
+        </section>
+      </aside>
+
+      <main class="map-area">
+        <div class="map-wrapper" id="map-wrapper">
+          <div class="map-holo-title">
+            <span>BAIDU SAT · GUANGZHOU</span>
+            <strong>天使之城侦破行动图</strong>
+          </div>
+          <div class="drag-hint">拖动平移 · 滚轮缩放</div>
+          <div class="map-scene-shell">
+            <svg class="map-overlay" id="map-overlay" viewBox="0 0 480 300" preserveAspectRatio="xMidYMid meet" aria-label="可交互城市侦破地图">
+              <defs>
+                <linearGradient id="river-glow" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#0ea5e9" stop-opacity="0.15" />
+                  <stop offset="45%" stop-color="#38bdf8" stop-opacity="0.7" />
+                  <stop offset="100%" stop-color="#1d4ed8" stop-opacity="0.2" />
+                </linearGradient>
+                <filter id="soft-glow" x="-40%" y="-40%" width="180%" height="180%">
+                  <feGaussianBlur stdDeviation="0.9" result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+                <pattern id="street-grid-a" width="2.4" height="2.4" patternUnits="userSpaceOnUse">
+                  <path d="M2.4 0V2.4M0 2.4H2.4" stroke="rgba(56,189,248,0.16)" stroke-width="0.12" fill="none" />
+                </pattern>
+                <pattern id="street-grid-b" width="3.2" height="3.2" patternUnits="userSpaceOnUse">
+                  <path d="M3.2 0V3.2M0 3.2H3.2" stroke="rgba(103,232,249,0.2)" stroke-width="0.14" fill="none" />
+                </pattern>
+                <pattern id="street-grid-c" width="1.8" height="1.8" patternUnits="userSpaceOnUse">
+                  <path d="M1.8 0V1.8M0 1.8H1.8" stroke="rgba(56,189,248,0.12)" stroke-width="0.1" fill="none" />
+                </pattern>
+                <pattern id="roof-dots" width="2.8" height="2.8" patternUnits="userSpaceOnUse">
+                  <rect x="0.35" y="0.35" width="1.7" height="1.5" fill="rgba(6,28,48,0.55)" stroke="rgba(45,212,255,0.14)" stroke-width="0.08" />
+                </pattern>
+              </defs>
+              <g id="city-backdrop"></g>
+              <g id="connection-lines"></g>
+              <g id="station-markers"></g>
+              <g id="entity-markers"></g>
+            </svg>
+          </div>
+        </div>
+        <div class="map-footer">
+          <div class="map-legend">
+            <span><i class="legend-dot player"></i> 侦探</span>
+            <span><i class="legend-dot suspect"></i> 嫌疑人</span>
+            <span><i class="legend-dot police"></i> 警局</span>
+            <span><i class="legend-dot gang"></i> 黑帮</span>
+            <span><i class="legend-dot station"></i> 普通地点</span>
+          </div>
+          <p class="handbook-notice">请结合《侦破手册》一起使用！！</p>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- 地点操作弹窗 -->
+  <div class="modal-backdrop hidden" id="station-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="station-modal-title">地点</h3>
+        <button type="button" class="modal-close" data-close="station-modal">×</button>
+      </div>
+      <div class="modal-body">
+        <p id="station-modal-desc"></p>
+        <div class="modal-actions">
+          <button type="button" id="btn-go" class="btn btn-primary">🚶 前往</button>
+          <button type="button" id="btn-investigate" class="btn btn-secondary">🔍 调查</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 搜身选择弹窗 -->
+  <div class="modal-backdrop hidden" id="search-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>选择搜身对象</h3>
+        <button type="button" class="modal-close" data-close="search-modal">×</button>
+      </div>
+      <div class="modal-body">
+        <ul class="suspect-pick-list" id="search-suspect-list"></ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 盘问对象选择 -->
+  <div class="modal-backdrop hidden" id="interrogate-pick-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>选择盘问对象</h3>
+        <button type="button" class="modal-close" data-close="interrogate-pick-modal">×</button>
+      </div>
+      <div class="modal-body">
+        <ul class="suspect-pick-list" id="interrogate-suspect-list"></ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 盘问：是否使用筹码 -->
+  <div class="modal-backdrop hidden" id="interrogate-chip-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>盘问</h3>
+        <button type="button" class="modal-close" data-close="interrogate-chip-modal">×</button>
+      </div>
+      <div class="modal-body">
+        <p id="interrogate-chip-msg"></p>
+        <div class="modal-actions">
+          <button type="button" id="btn-chip-no" class="btn btn-ghost">否</button>
+          <button type="button" id="btn-chip-yes" class="btn btn-primary">是，使用筹码</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 盘问结束：筹码 / 压力 -->
+  <div class="modal-backdrop hidden" id="interrogate-result-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>盘问结束！</h3>
+        <button type="button" class="modal-close" data-close="interrogate-result-modal">×</button>
+      </div>
+      <div class="modal-body">
+        <p id="interrogate-result-msg">盘问结束，是否获得筹码 / 压力？</p>
+        <div class="modal-actions">
+          <button type="button" id="btn-interrogate-close" class="btn btn-ghost">直接关闭</button>
+          <button type="button" id="btn-gain-stress" class="btn btn-danger">获得压力</button>
+          <button type="button" id="btn-gain-chip" class="btn btn-primary">获得筹码</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 对局中登记嫌疑人 -->
+  <div class="modal-backdrop hidden" id="add-suspect-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>登记嫌疑人</h3>
+        <button type="button" class="modal-close" data-close="add-suspect-modal">×</button>
+      </div>
+      <div class="modal-body">
+        <p class="hint">不消耗行动点。填写姓名与所在地点序号（1–100）。</p>
+        <div class="setup-section">
+          <label for="input-suspect-name">姓名</label>
+          <input type="text" id="input-suspect-name" placeholder="嫌疑人姓名" />
+        </div>
+        <div class="setup-section">
+          <label for="input-suspect-loc">地点序号</label>
+          <input type="number" id="input-suspect-loc" min="1" max="100" placeholder="1–100" />
+        </div>
+        <div class="modal-actions">
+          <button type="button" id="btn-add-suspect-cancel" class="btn btn-ghost">取消</button>
+          <button type="button" id="btn-add-suspect-confirm" class="btn btn-primary">确认登记</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 对局中地点备注 -->
+  <div class="modal-backdrop hidden" id="location-note-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>地点备注</h3>
+        <button type="button" class="modal-close" data-close="location-note-modal">×</button>
+      </div>
+      <div class="modal-body">
+        <p class="hint">不消耗行动点。如「案发现场」「xx 的公寓」等，添加后地图常显。</p>
+        <div class="setup-section">
+          <label for="input-note-loc">地点序号</label>
+          <input type="number" id="input-note-loc" min="1" max="100" placeholder="1–100" />
+        </div>
+        <div class="setup-section">
+          <label for="input-note-text">备注内容</label>
+          <input type="text" id="input-note-text" placeholder="案发现场 / xx 的公寓" maxlength="40" />
+        </div>
+        <div class="setup-section">
+          <h4>该地点已有备注</h4>
+          <ul class="note-manage-list" id="location-note-list"></ul>
+        </div>
+        <div class="modal-actions">
+          <button type="button" id="btn-location-note-cancel" class="btn btn-ghost">关闭</button>
+          <button type="button" id="btn-location-note-confirm" class="btn btn-primary">添加备注</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 开局设置弹窗 -->
+  <div class="modal-backdrop hidden" id="setup-modal">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h3>开局设置</h3>
+        <button type="button" class="modal-close" data-close="setup-modal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="setup-section">
+          <h4>侦探出生地点</h4>
+          <p class="hint">只能从警局出发（地图上白蓝色标记）</p>
+          <select id="input-player-start"></select>
+        </div>
+        <div class="setup-section">
+          <h4>嫌疑人设置（可选）</h4>
+          <p class="hint">开局时可不填；调查中可在侧边栏「登记嫌疑人」补充</p>
+          <div id="suspect-inputs"></div>
+          <button type="button" id="btn-add-suspect" class="btn btn-ghost btn-sm">+ 添加嫌疑人</button>
+        </div>
+        <div class="modal-actions">
+          <button type="button" id="btn-setup-cancel" class="btn btn-ghost">取消</button>
+          <button type="button" id="btn-setup-confirm" class="btn btn-primary">确认开始</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 历史存档弹窗 -->
+  <div class="modal-backdrop hidden" id="history-modal">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h3>近期游戏存档（最新 10 条）</h3>
+        <button type="button" class="modal-close" data-close="history-modal">×</button>
+      </div>
+      <div class="modal-body">
+        <div id="history-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 游戏结束弹窗 -->
+  <div class="modal-backdrop hidden" id="end-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="end-modal-title">游戏结束</h3>
+        <button type="button" class="modal-close" data-close="end-modal">×</button>
+      </div>
+      <div class="modal-body">
+        <p id="end-modal-msg"></p>
+        <div class="modal-actions">
+          <button type="button" id="btn-restart" class="btn btn-primary">重新开始</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast hidden" id="toast"></div>
+
+  <script type="module" src="/js/app.js?v=20260725-note"></script>
+  <!-- 修改筹码弹窗 -->
+  <div class="modal-backdrop hidden" id="modify-chips-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>修改筹码</h3>
+        <button type="button" class="modal-close" data-close="modify-chips-modal">×</button>
+      </div>
+      <div class="modal-body">
+        <p>选择嫌疑人并设置筹码数量：</p>
+        <div id="modify-chips-list"></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/service-worker.js').catch(() => {});
+}
+</script>
+</body>
+</html>
