@@ -4,7 +4,7 @@
  * connections 为相邻可达站点 id 列表（无向图，供移动逻辑使用；地图上不再绘制连线）
  */
 /** 百度卫星底图（广州市区离线拼接），仅视觉层，不影响格点坐标 */
-export const MAP_IMAGE = '/data/images/maps/guangzhou-sat.jpg?v=20260725-expand';
+export const MAP_IMAGE = 'data/images/maps/guangzhou-sat.jpg?v=20260725-expand';
 
 /** 画布尺寸（扩展后）：底图覆盖 480x300，游戏区域 320x200 居中 */
 export const MAP_WIDTH = 480;

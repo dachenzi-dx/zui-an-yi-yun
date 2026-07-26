@@ -1,16 +1,16 @@
 // Service Worker for PWA offline support
 const CACHE_NAME = 'sleuth-mode-v1.0';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/js/app.js',
-  '/js/game.js',
-  '/js/map-data.js',
-  '/js/storage.js',
-  '/css/styles.css',
-  '/data/images/icon.png',
-  '/data/images/maps/guangzhou-sat.jpg',
-  '/manifest.json'
+  './',
+  './index.html',
+  './js/app.js',
+  './js/game.js',
+  './js/map-data.js',
+  './js/storage.js',
+  './css/styles.css',
+  './data/images/icon.png',
+  './data/images/maps/guangzhou-sat.jpg',
+  './manifest.json'
 ];
 
 // Install event - cache resources
